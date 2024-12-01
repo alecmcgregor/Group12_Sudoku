@@ -91,7 +91,8 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def valid_in_box(self, row_start, col_start, num):
-        #if row_start%3==0 #IM NOT DONE WITH THIS YET
+        row_start-=row_start%3
+        col_start-=col_start%3
         for row_counter in range(row_start,row_start+3):
             for col_counter in range(col_start,col_start+3):
                 if num==self.board[row_counter][col_counter]:
@@ -109,7 +110,11 @@ class SudokuGenerator:
 	Return: boolean
     '''
     def is_valid(self, row, col, num):
-        pass
+        if self.valid_in_row(row,num):
+            if self.valid_in_col(col,num):
+                if self.valid_in_box(row,col,num):
+                    return True
+        return False
 
     '''
     Fills the specified 3x3 box with values
@@ -122,8 +127,15 @@ class SudokuGenerator:
 	Return: None
     '''
     def fill_box(self, row_start, col_start):
-        pass
-    
+        row_start-=row_start%3
+        col_start-=col_start%3
+        for row_counter in range(row_start,row_start+3):
+            for col_counter in range(col_start,col_start+3):
+                num=random.randint(1,9)
+                while not self.valid_in_box(row_counter,col_counter,num): #not sure about unused_in_box from directions, but valid_in_box will fulfill the same check when used like so
+                    num=random.randint(1,9)
+                self.board[row_counter][col_counter]=num
+
     '''
     Fills the three boxes along the main diagonal of the board
     These are the boxes which start at (0,0), (3,3), and (6,6)
@@ -132,7 +144,8 @@ class SudokuGenerator:
 	Return: None
     '''
     def fill_diagonal(self):
-        pass
+        for counter in range(0,7,3):
+            self.fill_box(counter,counter)
 
     '''
     DO NOT CHANGE
@@ -198,7 +211,7 @@ class SudokuGenerator:
 	Return: None
     '''
     def remove_cells(self):
-        pass
+
 
 '''
 DO NOT CHANGE
