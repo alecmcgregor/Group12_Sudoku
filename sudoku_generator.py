@@ -27,7 +27,7 @@ class SudokuGenerator:
         self.removed_cells=removed_cells
         self.board=[[0 for _ in range(9)] for _ in range(9)]
         self.box_length=int(math.sqrt(self.row_length))
-        self.solved_board=[]
+        self.solved_board=[] #this was useful for testing and debugging but not required in the code
 
     '''
 	Returns a 2D python list of numbers which represents the board
@@ -221,7 +221,7 @@ class SudokuGenerator:
 	Return: None
     '''
     def remove_cells(self):
-        self.solved_board=[row[:] for row in self.board]
+        self.solved_board=[row[:] for row in self.board] #this was added to test the function without altering the generate sudoku function
         for i in range(self.removed_cells):
             row=random.randint(0,8)
             col=random.randint(0,8)
@@ -252,4 +252,3 @@ def generate_sudoku(size, removed):
     sudoku.remove_cells()
     board = sudoku.get_board()
     return board
-
