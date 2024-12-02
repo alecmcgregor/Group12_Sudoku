@@ -1,3 +1,5 @@
+import sudoku_generator as sg
+import board
 import pygame
 
 class Cell:
@@ -10,8 +12,9 @@ class Cell:
         self.value=value
     def set_sketched_value(self,value):
         self.value=value
-    #def draw(self):
+    def draw(self):
         #Draws this cell, along with the value inside it.
+
         #If this cell has a nonzero value, that value is displayed.
         #Otherwise, no value is displayed in the cell.
         #The cell is outlined red if it is currently selected.
