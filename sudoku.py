@@ -58,6 +58,8 @@ class Cell:
         self.row=row
         self.col=col
         self.screen=screen
+        self.selected = False
+
     def set_cell_value(self,value):
         self.value=value
     def set_sketched_value(self,value):
@@ -75,6 +77,13 @@ class Cell:
         else:
             pygame.draw.rect(self.screen,'light blue',(self.col*cell_width+margin,self.row*cell_height+margin,cell_width-2*margin,cell_height-2*margin))
 
+        # Highlight the selected cell
+        if self.selected:
+            pygame.draw.rect(self.screen, 'red',
+                             (self.col * cell_width,
+                              self.row * cell_height,
+                              cell_width, cell_height), width=3)
+
 class Board:
     def __init__(self,width,height,screen,difficulty,board):
         self.width=width
@@ -82,25 +91,50 @@ class Board:
         self.screen=screen
         self.difficulty=difficulty
         self.board=board
+        self.cells = [[Cell(self.board[i][j], i, j, screen) for j in range(9)] for i in range(9)]
+        self.selected = (0, 0)
+
     def draw(self):
-        for i in range(0,self.width+1,int(self.width/9)):
+        # Draw thin grid lines for all cells (9x9 grid)
+        for i in range(0, self.width + 1, int(self.width / 9)):
             pygame.draw.line(self.screen, (0, 0, 0), (i, 0), (i, self.height))
-        for i in range(0,self.height+1,int(self.height/9)):
+        for i in range(0, self.height + 1, int(self.height / 9)):
             pygame.draw.line(self.screen, (0, 0, 0), (0, i), (self.width, i))
-        for i in range(0,self.width+1,int(self.width/3)):
-            pygame.draw.line(self.screen, (0, 0, 0), (i, 0), (i, self.height),width=3)
-        for i in range(0,self.height+1,int(self.height/3)):
-            pygame.draw.line(self.screen, (0, 0, 0), (0, i), (self.width, i),width=3)
-        row_counter=0
-        col_counter=0
-        for num in range(81):
-            num=Cell(self.board[row_counter][col_counter], row_counter, col_counter, self.screen)
-            num.draw()
-            col_counter+=1
-            if col_counter==9:
-                col_counter=0
-                row_counter+=1
-    #def select(self,row,col):
+
+        # Draw thick grid lines for the 3x3 sub-boxes
+        for i in range(0, self.width + 1, int(self.width / 3)):
+            pygame.draw.line(self.screen, (0, 0, 0), (i, 0), (i, self.height), width=3)
+        for i in range(0, self.height + 1, int(self.height / 3)):
+            pygame.draw.line(self.screen, (0, 0, 0), (0, i), (self.width, i), width=3)
+
+        # Iterate over the pre-initialized self.cells to draw each cell
+        for i in range(9):
+            for j in range(9):
+                self.cells[i][j].draw()
+
+    def select(self, row, col):
+        for i in range(9):
+            for j in range(9):
+                self.cells[i][j].selected = False
+
+        self.cells[row][col].selected = True
+        self.selected = (row, col)
+
+    def click(self, x, y):
+        cell_width = self.width // 9
+        cell_height = self.height // 9
+        row, col = y // cell_height, x // cell_width
+        if 0 <= row < 9 and 0 <= col < 9:
+            self.select(row, col)
+
+    def sketch(self, value):
+        row, col = self.selected
+        self.cells[row][col].set_sketched_value(value)
+
+    def place_number(self, value):
+        row, col = self.selected
+        self.cells[row][col].set_cell_value(value)
+
 
 
 def main():
@@ -118,13 +152,43 @@ def main():
     game_board.draw()
     pygame.display.update()
     while True:
-        pass
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                sys.exit()
 
+            # Handle mouse click
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                x, y = event.pos
+                game_board.click(x, y)
 
+            # Handle key press
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_UP:
+                    row, col = game_board.selected
+                    if row > 0:
+                        game_board.select(row - 1, col)
+                elif event.key == pygame.K_DOWN:
+                    row, col = game_board.selected
+                    if row < 8:
+                        game_board.select(row + 1, col)
+                elif event.key == pygame.K_LEFT:
+                    row, col = game_board.selected
+                    if col > 0:
+                        game_board.select(row, col - 1)
+                elif event.key == pygame.K_RIGHT:
+                    row, col = game_board.selected
+                    if col < 8:
+                        game_board.select(row, col + 1)
+                elif pygame.K_1 <= event.key <= pygame.K_9:  # Numbers 1-9
+                    game_board.place_number(event.key - pygame.K_0)
+                elif event.key == pygame.K_RETURN:  # Confirm placement
+                    row, col = game_board.selected
+                    # Additional logic to confirm input can be added here.
 
-
-
-
+        screen.fill("light blue")
+        game_board.draw()
+        pygame.display.update()
 
 if __name__=="__main__":
     main()
