@@ -39,7 +39,7 @@ class SudokuGenerator:
         return self.board
 
     '''
-    Returns a 2D python list of number which represents the solved board
+    Returns a 2D python list of numbers which represents the solved board
     
     Parameters: None
     Return: list[list]
