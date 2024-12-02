@@ -3,18 +3,18 @@ import sudoku_generator
 
 #THESE GLOBAL VARIABLES ARE NEEDED FOR THE CODE TO FUNCTION
 width = 576
-height = 576
+height = 640 #additional 64 pixels of height for 3 buttons
 
 def draw_game_start(screen):
     title_font=pygame.font.Font(None,64)
     button_font=pygame.font.Font(None,32)
     screen.fill("light blue")
     title_surface=title_font.render("Welcome to Sudoku",0,"black")
-    title_box=title_surface.get_rect(center=(width//2,height//2-150))
+    title_box=title_surface.get_rect(center=(width//2,(height-64)//2-150))
     screen.blit(title_surface,title_box)
     game_mode_font=pygame.font.Font(None, 42)
     game_mode_surface=game_mode_font.render("Select game mode:",0,"black")
-    game_mode_box=game_mode_surface.get_rect(center=(width//2,height//2))
+    game_mode_box=game_mode_surface.get_rect(center=(width//2,(height-64)//2))
     screen.blit(game_mode_surface,game_mode_box)
     easy_text=button_font.render("Easy",0,(0,0,0))
     normal_text=button_font.render("Normal",0,(0,0,0,))
@@ -28,9 +28,9 @@ def draw_game_start(screen):
     hard_surface=pygame.Surface((hard_text.get_size()[0]+20,hard_text.get_size()[1]+20))
     hard_surface.fill("orange")
     hard_surface.blit(hard_text,(10,10))
-    easy_box=easy_surface.get_rect(center=(width//4,height//2+150))
-    normal_box=normal_surface.get_rect(center=(width//2,height//2+150))
-    hard_box=hard_surface.get_rect(center=((width//4)*3,height//2+150))
+    easy_box=easy_surface.get_rect(center=(width//4,(height-64)//2+150))
+    normal_box=normal_surface.get_rect(center=(width//2,(height-64)//2+150))
+    hard_box=hard_surface.get_rect(center=((width//4)*3,(height-64)//2+150))
     screen.blit(easy_surface,easy_box)
     screen.blit(normal_surface,normal_box)
     screen.blit(hard_surface,hard_box)
@@ -65,7 +65,7 @@ class Cell:
     def draw(self):
         # The cell is outlined red if it is currently selected. (I feel like this should be implemented elsewhere like in the events for the game)
         cell_width=width//9
-        cell_height=height//9
+        cell_height=(height-64)//9
         margin=2
         if self.value>0:
             value_font=pygame.font.Font(None,36)
@@ -100,6 +100,8 @@ class Board:
             if col_counter==9:
                 col_counter=0
                 row_counter+=1
+    #def select(self,row,col):
+
 
 def main():
     pygame.init()
@@ -111,7 +113,7 @@ def main():
     solution=game.get_board()
     game.remove_cells()
     board=game.get_board()
-    game_board=Board(width,height,screen,difficulty,board)
+    game_board=Board(width,(height-64),screen,difficulty,board)
     screen.fill("light blue")
     game_board.draw()
     pygame.display.update()
