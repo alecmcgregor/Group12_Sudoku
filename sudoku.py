@@ -48,9 +48,20 @@ def draw_game_start(screen):
         pygame.display.update()
 
 # def draw_winner_screen(screen):
-#
-#
+def draw_winner_screen(screen):
+    font = pygame.font.Font(None, 64)
+    text = font.render("You Win!", True, (0, 255, 0))
+    text_rect = text.get_rect(center=(width // 2, height // 2 - 50))
+    screen.blit(text, text_rect)
+
 # def draw_loser_screen(screen):
+def draw_loser_screen(screen):
+    font = pygame.font.Font(None, 64)
+    text = font.render("Game Over!", True, (255, 0, 0))
+    text_rect = text.get_rect(center=(width // 2, height // 2 - 50))
+    screen.blit(text, text_rect)
+
+
 
 class Cell:
     def __init__(self,value,row,col,screen):
@@ -135,12 +146,41 @@ class Board:
         row, col = self.selected
         self.cells[row][col].set_cell_value(value)
 
+    # check if the board is full
+    def is_full(self):
+        for row in range(9):
+            for col in range(9):
+                if self.board[row][col] == 0:  # If any cell is empty (0)
+                    return False
+        return True
 
+    # update the  the values from the cells
+    def update_board(self):
+        for i in range(9):
+            for j in range(9):
+                self.board[i][j] = self.cells[i][j].value
+
+    # find an empty cell and return its row and column (x, y)
+    def find_empty(self):
+        for row in range(9):
+            for col in range(9):
+                if self.board[row][col] == 0:  # An empty cell is denoted by 0
+                    return (row, col)
+        return None  # If no empty cell is found
+
+    # check whether the board is correctly solved
+    def check_board(self):
+        for row in range(9):
+            for col in range(9):
+                if self.board[row][col] != self.cells[row][col].value:
+                    return False
+        return True
 
 def main():
     pygame.init()
     screen=pygame.display.set_mode((width,height))
     pygame.display.set_caption("Sudoku")
+
     difficulty=draw_game_start(screen)
     game=sudoku_generator.SudokuGenerator(9,difficulty)
     game.fill_values()
@@ -148,19 +188,40 @@ def main():
     game.remove_cells()
     board=game.get_board()
     game_board=Board(width,(height-64),screen,difficulty,board)
-    screen.fill("light blue")
-    game_board.draw()
-    pygame.display.update()
-    while True:
+
+
+    #pygame.display.update()
+
+    # define buttons with the position and sizes
+    reset_button = pygame.Rect(50, height - 60, 100, 40)
+    restart_button = pygame.Rect(200, height - 60, 100, 40)
+    exit_button = pygame.Rect(350, height - 60, 100, 40)
+
+    # ESHA- i changed this a little
+    # while True:
+    #     for event in pygame.event.get():
+    #         if event.type == pygame.QUIT:
+    #             pygame.quit()
+    #             sys.exit()
+    running = True
+    while running:
+        # Event handling
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
-                pygame.quit()
-                sys.exit()
+                running = False
 
             # Handle mouse click
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 game_board.click(x, y)
+            # Check button clicks
+                if reset_button.collidepoint(event.pos):
+                    game_board = Board(width, height - 64, screen, difficulty, game.get_board())
+                elif restart_button.collidepoint(event.pos):
+                    return
+                elif exit_button.collidepoint(event.pos):
+                    running = False
+
 
             # Handle key press
             if event.type == pygame.KEYDOWN:
@@ -186,8 +247,37 @@ def main():
                     row, col = game_board.selected
                     # Additional logic to confirm input can be added here.
 
+
+        # Check for win or lose
+        if game_board.is_full():
+            if game_board.check_board():  # Check if the board is solved correctly
+                draw_winner_screen(screen)
+            else:
+                draw_loser_screen(screen)
+
         screen.fill("light blue")
         game_board.draw()
+            # Draw buttons with orange background and white text
+        button_font = pygame.font.Font(None, 36)
+
+        # Draw Reset button
+        pygame.draw.rect(screen, (255, 165, 0), reset_button)  # Orange color
+        reset_text = button_font.render("Reset", True, (255, 255, 255))  # White font
+        screen.blit(reset_text, reset_button.move(30, 10))
+
+        # Draw Restart button
+        pygame.draw.rect(screen, (255, 165, 0), restart_button)  # Orange color
+        restart_text = button_font.render("Restart", True, (255, 255, 255))  # White font
+        screen.blit(restart_text, restart_button.move(20, 10))
+
+        # Draw Exit button
+        pygame.draw.rect(screen, (255, 165, 0), exit_button)  # Orange color
+        exit_text = button_font.render("Exit", True, (255, 255, 255))  # White font
+        screen.blit(exit_text, exit_button.move(30, 10))
+
+
+
+
         pygame.display.update()
 
 if __name__=="__main__":
