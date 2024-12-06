@@ -75,33 +75,48 @@ class Cell:
         self.value=value
     def set_sketched_value(self,value):
         self.value=value
+
     def draw(self):
-        # The cell is outlined red if it is currently selected. (I feel like this should be implemented elsewhere like in the events for the game)
-        cell_width=width//9
-        cell_height=(height-64)//9
-        margin=2
-        if self.value>0:
-            value_font=pygame.font.Font(None,36)
-            value_text=value_font.render(f'{self.value}',0,"black")
-            value_box=value_text.get_rect(center=(self.col*cell_width+cell_width//2,self.row*cell_height+cell_height//2))
-            self.screen.blit(value_text,value_box)
+        # The dimensions of each cell
+        cell_width = width // 9
+        cell_height = (height - 64) // 9
+        margin = 2
+
+        # Draw the confirmed value in the cell
+        if self.value > 0:
+            value_font = pygame.font.Font(None, 36)
+            value_text = value_font.render(f'{self.value}', 0, "black")
+            value_box = value_text.get_rect(
+                center=(self.col * cell_width + cell_width // 2, self.row * cell_height + cell_height // 2))
+            self.screen.blit(value_text, value_box)
+
+        # Draw the cell's background
         else:
-            pygame.draw.rect(self.screen,'light blue',(self.col*cell_width+margin,self.row*cell_height+margin,cell_width-2*margin,cell_height-2*margin))
+            pygame.draw.rect(self.screen, 'light blue', (
+            self.col * cell_width + margin, self.row * cell_height + margin, cell_width - 2 * margin,
+            cell_height - 2 * margin))
+
+        # Display sketched values in a smaller font
+        if hasattr(self, 'sketched_value') and self.sketched_value > 0:
+            sketch_font = pygame.font.Font(None, 20)
+            sketch_text = sketch_font.render(f'{self.sketched_value}', 0, "grey")
+            sketch_box = sketch_text.get_rect(topleft=(self.col * cell_width + 5, self.row * cell_height + 5))
+            self.screen.blit(sketch_text, sketch_box)
 
         # Highlight the selected cell
         if self.selected:
             pygame.draw.rect(self.screen, 'red',
-                             (self.col * cell_width,
-                              self.row * cell_height,
-                              cell_width, cell_height), width=3)
+                             (self.col * cell_width, self.row * cell_height, cell_width, cell_height), width=3)
+
 
 class Board:
-    def __init__(self,width,height,screen,difficulty,board):
-        self.width=width
-        self.height=height
-        self.screen=screen
-        self.difficulty=difficulty
-        self.board=board
+    def __init__(self, width, height, screen, difficulty, board, generator):
+        self.width = width
+        self.height = height
+        self.screen = screen
+        self.difficulty = difficulty
+        self.board = board
+        self.generator = generator
         self.cells = [[Cell(self.board[i][j], i, j, screen) for j in range(9)] for i in range(9)]
         self.selected = (0, 0)
 
@@ -140,11 +155,15 @@ class Board:
 
     def sketch(self, value):
         row, col = self.selected
-        self.cells[row][col].set_sketched_value(value)
+        self.cells[row][col].sketched_value = value
 
     def place_number(self, value):
         row, col = self.selected
-        self.cells[row][col].set_cell_value(value)
+        if self.generator.is_valid(row, col, value):
+            self.cells[row][col].set_cell_value(value)
+            self.update_board()
+        else:
+            print("Invalid move!")
 
     # check if the board is full
     def is_full(self):
@@ -170,9 +189,10 @@ class Board:
 
     # check whether the board is correctly solved
     def check_board(self):
+        solved_board = solution  # Access the solved board from the generator
         for row in range(9):
             for col in range(9):
-                if self.board[row][col] != self.cells[row][col].value:
+                if self.board[row][col] != solved_board[row][col]:
                     return False
         return True
 
@@ -182,13 +202,12 @@ def main():
     pygame.display.set_caption("Sudoku")
 
     difficulty=draw_game_start(screen)
-    game=sudoku_generator.SudokuGenerator(9,difficulty)
+    game = sudoku_generator.SudokuGenerator(9, difficulty)
     game.fill_values()
-    solution=game.get_board()
+    solution = game.get_solved_board()
     game.remove_cells()
-    board=game.get_board()
-    game_board=Board(width,(height-64),screen,difficulty,board)
-
+    board = game.get_board()
+    game_board = Board(width, height - 64, screen, difficulty, board, game)
 
     #pygame.display.update()
 
