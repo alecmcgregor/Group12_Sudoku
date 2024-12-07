@@ -131,6 +131,15 @@ def draw_loser_screen(screen):
                     #use return to break out of the for and while loop and resume the next line in the main code
                     return
 
+def initialize_game(screen):
+    difficulty = draw_game_start(screen)
+    screen.fill("light blue")
+    game_board = Board(width, height - 64, screen, difficulty)
+    game_board.draw()
+    reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
+    pygame.display.update()
+    print(game_board.solution)  # for the purpose of debugging easier so that we have a key to look at
+    return game_board, reset_box, restart_box, exit_box
 
 class Cell:
     def __init__(self,value,row,col,screen):
@@ -287,15 +296,15 @@ def main():
     pygame.init()
     screen=pygame.display.set_mode((width,height))
     pygame.display.set_caption("Sudoku")
-    difficulty=draw_game_start(screen)
-
-    #initializes the board based on the selected difficulty and displays it
-    screen.fill("light blue")
-    game_board = Board(width, height - 64, screen, difficulty)
-    game_board.draw()
-    reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
-    pygame.display.update()
-    print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
+    game_board, reset_box, restart_box, exit_box = initialize_game(screen)
+    # difficulty=draw_game_start(screen)
+    # #initializes the board based on the selected difficulty and displays it
+    # screen.fill("light blue")
+    # game_board = Board(width, height - 64, screen, difficulty)
+    # game_board.draw()
+    # reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
+    # pygame.display.update()
+    # print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
 
     running = True
     while running:
@@ -318,13 +327,14 @@ def main():
                     game_board.reset_to_original()
                 #event for button to restart the game entirely
                 if restart_box.collidepoint(event.pos):
-                    difficulty = draw_game_start(screen)
-                    screen.fill("light blue")
-                    game_board = Board(width, height - 64, screen, difficulty)
-                    game_board.draw()
-                    reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
-                    pygame.display.update()
-                    print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
+                    game_board, reset_box, restart_box, exit_box = initialize_game(screen)
+                    # difficulty = draw_game_start(screen)
+                    # screen.fill("light blue")
+                    # game_board = Board(width, height - 64, screen, difficulty)
+                    # game_board.draw()
+                    # reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
+                    # pygame.display.update()
+                    # print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
                     continue
                 #event for button to exit the program
                 if exit_box.collidepoint(event.pos):
@@ -371,13 +381,14 @@ def main():
             else:
                 draw_loser_screen(screen) #will display loser screen
                 #will initialize a new game without needing to leave the game loop
-                difficulty = draw_game_start(screen)
-                screen.fill("light blue")
-                game_board = Board(width, height - 64, screen, difficulty)
-                game_board.draw()
-                reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
-                pygame.display.update()
-                print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
+                game_board, reset_box, restart_box, exit_box = initialize_game(screen)
+                # difficulty = draw_game_start(screen)
+                # screen.fill("light blue")
+                # game_board = Board(width, height - 64, screen, difficulty)
+                # game_board.draw()
+                # reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
+                # pygame.display.update()
+                # print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
 
 
 
