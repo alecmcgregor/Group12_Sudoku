@@ -138,7 +138,7 @@ def initialize_game(screen):
     game_board.draw()
     reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
     pygame.display.update()
-    print(game_board.solution)  # for the purpose of debugging easier so that we have a key to look at
+    #print(game_board.solution)  # this was for the purpose of making debugging easier so that we have a key to look at
     return game_board, reset_box, restart_box, exit_box
 
 class Cell:
