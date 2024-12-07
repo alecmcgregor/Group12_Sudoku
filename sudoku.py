@@ -1,21 +1,27 @@
 import pygame, sys
 import sudoku_generator
 
-#THESE GLOBAL VARIABLES ARE NEEDED FOR THE CODE TO FUNCTION
 width = 576
 height = 640 #additional 64 pixels of height for 3 buttons
 
 def draw_game_start(screen):
+    #create fonts being used
     title_font=pygame.font.Font(None,64)
     button_font=pygame.font.Font(None,32)
     screen.fill("light blue")
+
+    #create title
     title_surface=title_font.render("Welcome to Sudoku",True,"black")
     title_box=title_surface.get_rect(center=(width//2,(height-64)//2-150))
     screen.blit(title_surface,title_box)
+
+    #create game mode message
     game_mode_font=pygame.font.Font(None, 42)
     game_mode_surface=game_mode_font.render("Select game mode:",True,"black")
     game_mode_box=game_mode_surface.get_rect(center=(width//2,(height-64)//2))
     screen.blit(game_mode_surface,game_mode_box)
+
+    #create easy, normal and hard buttons
     easy_text=button_font.render("Easy",True,(0,0,0))
     normal_text=button_font.render("Normal",True,(0,0,0,))
     hard_text=button_font.render("Hard",True,(0,0,0))
@@ -36,9 +42,9 @@ def draw_game_start(screen):
     screen.blit(hard_surface,hard_box)
     while True:
         for event in pygame.event.get():
-            if event.type==pygame.QUIT:
+            if event.type==pygame.QUIT: #if the screen is exited with x in top right corner
                 sys.exit()
-            if event.type==pygame.MOUSEBUTTONDOWN:
+            if event.type==pygame.MOUSEBUTTONDOWN: #if any of the difficulty boxes are selected
                 if easy_box.collidepoint(event.pos):
                     return 30
                 elif normal_box.collidepoint(event.pos):
@@ -48,6 +54,7 @@ def draw_game_start(screen):
         pygame.display.update()
 
 def draw_in_game_buttons(screen):
+    #font used for buttons
     button_font = pygame.font.Font(None, 32)
 
     # reset button generation
@@ -74,6 +81,7 @@ def draw_in_game_buttons(screen):
     exit_box = exit_surface.get_rect(center=((width // 4) * 3, height - 32))
     screen.blit(exit_surface, exit_box)
 
+    #returning the boxes for collision purposes in the main code
     return reset_box, restart_box, exit_box
 
 # def draw_winner_screen(screen):
@@ -120,6 +128,7 @@ def draw_loser_screen(screen):
                 sys.exit()
             if event.type==pygame.MOUSEBUTTONDOWN:
                 if restart_box.collidepoint(event.pos):
+                    #use return to break out of the for and while loop and resume the next line in the main code
                     return
 
 
@@ -131,11 +140,15 @@ class Cell:
         self.screen=screen
         self.selected = False
 
+    #will change the instance attribute value to the value passed into this function
     def set_cell_value(self,value):
         self.value=value
+
+    #will change the instance attribute sketched_value to the value passed into this function
     def set_sketched_value(self,value):
         self.sketched_value=value
 
+    #will draw the value of the cell if it has one, and it will outline a cell if it is selected
     def draw(self):
         # The dimensions of each cell
         cell_width = width // 9
@@ -204,6 +217,7 @@ class Board:
             for j in range(9):
                 self.cells[i][j].draw()
 
+    #used to designate what cell is selected and should be highlighted
     def select(self, row, col):
         for i in range(9):
             for j in range(9):
@@ -211,6 +225,7 @@ class Board:
         self.cells[row][col].selected = True
         self.selected = (row, col)
 
+    #used to click on a cell with the mouse and pass the row and col into the select function
     def click(self, x, y):
         cell_width = self.width // 9
         cell_height = self.height // 9
@@ -227,17 +242,20 @@ class Board:
         elif self.board[row][col] == 0 and self.cells[row][col].value > 0:
             self.cells[row][col].set_cell_value(0)
 
+    #changes the sketched value of a cell
     def sketch(self, value):
         row, col = self.selected
         if self.board[row][col] == 0:
             self.cells[row][col].set_sketched_value(value)
 
+    #changes the value of a cell
     def place_number(self, value):
         row, col = self.selected
         if hasattr(self.cells[row][col], 'sketched_value') and self.cells[row][col].sketched_value > 0:
             self.cells[row][col].set_cell_value(value)
             self.cells[row][col].set_sketched_value(0)
 
+    #will reset all entered values to zero so that the board is in its original state
     def reset_to_original(self):
         self.cells = [[Cell(self.board[i][j], i, j, self.screen) for j in range(9)] for i in range(9)]
 
@@ -255,9 +273,9 @@ class Board:
             for j in range(9):
                 self.board[i][j] = self.cells[i][j].value
 
-    # find_empty ended up not being useful for the sake of our code
+    # find_empty function ended up not being useful for the sake of our code
 
-    # check whether the board is correctly solved
+    # checks whether the board is correctly solved
     def check_board(self):
         if self.board == self.solution:
             return True
@@ -265,21 +283,25 @@ class Board:
 
 
 def main():
+    #initalizes pygame and brings up the start screen
     pygame.init()
     screen=pygame.display.set_mode((width,height))
     pygame.display.set_caption("Sudoku")
     difficulty=draw_game_start(screen)
+
+    #initializes the board based on the selected difficulty and displays it
     screen.fill("light blue")
     game_board = Board(width, height - 64, screen, difficulty)
     game_board.draw()
     reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
     pygame.display.update()
-    print(game_board.solution)
+    print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
 
     running = True
     while running:
         # Event handling
         for event in pygame.event.get():
+            # Handle top right exit button
             if event.type == pygame.QUIT:
                 running = False
 
@@ -287,11 +309,14 @@ def main():
             if event.type == pygame.MOUSEBUTTONDOWN:
                 x, y = event.pos
                 result = game_board.click(x, y)
+                # For selecting a cell
                 if result:
                     row, col = result
                     game_board.select(row, col)
+                #event for button to reset the board
                 if reset_box.collidepoint(event.pos):
                     game_board.clear()
+                #event for button to restart the game entirely
                 if restart_box.collidepoint(event.pos):
                     difficulty = draw_game_start(screen)
                     screen.fill("light blue")
@@ -299,8 +324,9 @@ def main():
                     game_board.draw()
                     reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
                     pygame.display.update()
-                    print(game_board.solution)
+                    print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
                     continue
+                #event for button to exit the program
                 if exit_box.collidepoint(event.pos):
                     running = False
 
@@ -331,24 +357,27 @@ def main():
                 elif event.key == pygame.K_BACKSPACE: #deletes cell value
                     game_board.clear()
 
+        #section to update the screen after each iteration
         screen.fill("light blue")
         game_board.draw()
         reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
         pygame.display.update()
 
+        # checks to see if the board is full so the game ends
         if game_board.is_full():
-            game_board.update_board()
-            if game_board.check_board():
-                draw_winner_screen(screen)
+            game_board.update_board() #updates all cell choices into the board
+            if game_board.check_board(): #compares our choices and the save answer key
+                draw_winner_screen(screen) #will display winner screen
             else:
-                draw_loser_screen(screen)
+                draw_loser_screen(screen) #will display loser screen
+                #will initialize a new game without needing to leave the game loop
                 difficulty = draw_game_start(screen)
                 screen.fill("light blue")
                 game_board = Board(width, height - 64, screen, difficulty)
                 game_board.draw()
                 reset_box, restart_box, exit_box = draw_in_game_buttons(screen)
                 pygame.display.update()
-                print(game_board.solution)
+                print(game_board.solution) #for the purpose of debugging easier so that we have a key to look at
 
 
 
