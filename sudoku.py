@@ -315,7 +315,7 @@ def main():
                     game_board.select(row, col)
                 #event for button to reset the board
                 if reset_box.collidepoint(event.pos):
-                    game_board.clear()
+                    game_board.reset_to_original()
                 #event for button to restart the game entirely
                 if restart_box.collidepoint(event.pos):
                     difficulty = draw_game_start(screen)
